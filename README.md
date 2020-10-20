@@ -7,10 +7,17 @@
 
 
 Как это использовать:
+```bash
 ./my-beautifulserver 2>&1 | ../logger/logger.sh ./logger.conf
+```
 Здесь мы в файл пишем как стандартный вывод(stdout), так и вывод ошибок(stderr).
 
 ## Testing
 ```bash
 ./test.sh | ./logger.sh
 ```
+
+## Недоделки и баги
+* Запуск не из текущей директории
+* Восприятие пути до файла с logger.conf
+* Справка
