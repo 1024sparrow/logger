@@ -17,6 +17,16 @@
 ./test.sh | ./logger.sh
 ```
 
+## Настройки
+Вот пример файлв logger.conf:
+```bash
+print_to_tty=true
+log_dir=./logs
+log_file_name_base=test
+log_file_limit=200 # in bytes
+log_files_limit=20
+```
+
 ## Недоделки и баги
 * Запуск не из текущей директории
 * Восприятие пути до файла с logger.conf
