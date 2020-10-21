@@ -1,11 +1,62 @@
 #!/bin/bash
 
+declare -i state=0
+for i in $*
+do
+	if [[ $i == "--help" || $i == "-h" ]]
+	then
+		echo "$(basename $0) [--help] [--generate-config <FILENAME>] [--config <FILENAME>]
+Valid arguments:
+--help
+--generate-config <FILENAME>
+--config <FILENAME>  - use FILENAME as $(basename $0) config
+
+Generate config first. Then change that config (if needed) and use it.
+"
+		exit 0
+	elif [[ $i == "--generate-config" ]]
+	then
+		state=1
+	elif [[ $i == "--config" ]]
+	then
+		state=2
+	elif [[ $i =~ -.* ]]
+	then
+		echo "unsupported key: " $i
+		exit 1
+	else
+		if [ $state == 1 ]
+		then
+			echo "# Если при работающем логгере меняете директорию логирования, обеспечьте чистоту новой директории, перед тем как на неё переключать
+
+print_to_tty=true
+log_dir=1
+log_file_name_base=test
+log_file_limit=200 # in bytes
+log_files_limit=20" > "$i"
+			exit 0
+		elif [ $state == 2 ]
+		then
+			log_config_path=$(realpath "$i")
+		fi
+	fi
+done
+
+if [ ! -f "$log_config_path" ]
+then
+	echo "Please point config file path"
+	exit 1
+fi
+
+curdir=$(dirname "$log_config_path")
+pushd "$curdir" > /dev/null
+
 declare -i sz=0
 declare -i log_file_limit=0
 declare -i log_files_limit=0
 declare -i log_index=1
 
-source logger.conf
+source "$log_config_path"
 if [ -d "$log_dir" ]
 then
 	for i in $(seq $log_files_limit)
@@ -20,7 +71,7 @@ fi
 
 while read line
 do
-	source logger.conf
+	source "$log_config_path"
 	if $print_to_tty
 	then
 		echo "$line"
@@ -49,3 +100,5 @@ do
 	fi
 #
 done
+
+popd > /dev/null
