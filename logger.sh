@@ -61,6 +61,10 @@ function refresh_config {
 	source "$log_config_path"
 }
 
+function get_size {
+	sz=$(ls -l "$1" | awk '{print $5}')
+}
+
 curdir=$(dirname "$log_config_path")
 pushd "$curdir" > /dev/null
 
@@ -72,14 +76,18 @@ declare -i log_index=1
 refresh_config
 if [ -d "$log_dir" ]
 then
-	for i in $(seq $log_files_limit)
-	do
-		if [ ! -a "$log_dir"/"log_file_name_base".log.$i ]
+	if [ -f "$log_dir"/last_log_index.txt ]
+	then
+		log_index=$(cat "$log_dir"/last_log_index.txt)
+	fi
+	if [ -f "$log_dir"/"$log_file_name_base".log.$log_index ]
+	then
+		get_size "$log_dir"/"$log_file_name_base".log.$log_index
+		if [ $sz -gt $log_file_limit ] # this is the oldest log to rewrite (ring logs)
 		then
-			log_index=$i
-			break
+			echo -n "" > "$log_dir"/"$log_file_name_base".log.$log_index
 		fi
-	done
+	fi
 fi
 
 while read line
@@ -94,24 +102,23 @@ do
 		log_file_name="$log_file_name_base".log.$log_index
 		mkdir -p "$log_dir"
 
-		echo -n "" >> "$log_dir"/"$log_file_name"
-		sz=$(ls -l "$log_dir"/"$log_file_name" | awk '{print $5}')
+		echo "$line" >> "$log_dir"/"$log_file_name"
+		get_size "$log_dir"/"$log_file_name"
 		if [ $sz -gt $log_file_limit ]
 		then
 			log_index+=1
+			log_file_name="$log_file_name_base".log.$log_index
 		fi
 		if [ $log_index -gt $log_files_limit ]
 		then
-			echo превышен лимит на количество файлов логов.
 			log_index=1
 			log_file_name="$log_file_name_base".log.$log_index
-			echo -n "" > "$log_dir"/"$log_file_name"
 		fi
-		echo "$line" >> "$log_dir"/"$log_file_name"
 		echo "$log_index" > "$log_dir"/last_log_index.txt
 		echo "$log_file_name" > "$log_dir"/last_log_filename.txt
 	fi
 #
 done
 
+rm $refresh_config__mapped
 popd > /dev/null
