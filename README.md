@@ -15,13 +15,24 @@
 ```
 Здесь мы в файл пишем как стандартный вывод(stdout), так и вывод ошибок(stderr).
 
+```bash
+logger.sh [--help] [--generate-config <FILENAME>] [--config <FILENAME>]
+Valid arguments:
+--help
+--generate-config <FILENAME>
+--config <FILENAME>  - use FILENAME as logger.sh config
+
+Generate config first. Then change that config (if needed) and use it.
+```
+
+
 ## Тестирование
 ```bash
 ./test.sh | ./logger.sh
 ```
 
 ## Настройки
-Вот пример файлв logger.conf:
+Вот пример файла logger.conf:
 ```bash
 print_to_tty=true
 log_dir=./logs
