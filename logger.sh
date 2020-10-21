@@ -48,6 +48,19 @@ then
 	exit 1
 fi
 
+# Starting logging
+
+refresh_config__mapped=$(mktemp)
+trap "rm $refresh_config__mapped;echo logger stopped;exit 0" INT # remove temporary file when Ctrl+C
+cat "$log_config_path" > $refresh_config__mapped
+function refresh_config {
+	if [ "$log_config_path" -nt $refresh_config__mapped ]
+	then
+		cat "$log_config_path" > $refresh_config__mapped
+	fi
+	source "$log_config_path"
+}
+
 curdir=$(dirname "$log_config_path")
 pushd "$curdir" > /dev/null
 
@@ -56,7 +69,7 @@ declare -i log_file_limit=0
 declare -i log_files_limit=0
 declare -i log_index=1
 
-source "$log_config_path"
+refresh_config
 if [ -d "$log_dir" ]
 then
 	for i in $(seq $log_files_limit)
@@ -71,7 +84,7 @@ fi
 
 while read line
 do
-	source "$log_config_path"
+	refresh_config
 	if $print_to_tty
 	then
 		echo "$line"
@@ -82,7 +95,7 @@ do
 		mkdir -p "$log_dir"
 
 		echo -n "" >> "$log_dir"/"$log_file_name"
-		sz=$(ls -l $log_dir/$log_file_name | awk '{print $5}')
+		sz=$(ls -l "$log_dir"/"$log_file_name" | awk '{print $5}')
 		if [ $sz -gt $log_file_limit ]
 		then
 			log_index+=1
