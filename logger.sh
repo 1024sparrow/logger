@@ -58,7 +58,7 @@ function refresh_config {
 	then
 		cat "$log_config_path" > $refresh_config__mapped
 	fi
-	source "$log_config_path"
+	source $refresh_config__mapped
 }
 
 function get_size {
