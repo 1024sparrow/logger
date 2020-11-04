@@ -15,6 +15,9 @@ OPTIONS:
 --help - show this help
 
 PATH_TO_FILE_WITH_PASSING_TAGS_TEMPLATES - one or more filepath-s (with list of filter templates each). First would apply for first word of each line, second - for second & etc.
+
+EXAMPLE:
+my-beautiful-server | tag-filter.sh ./tagFileTemplatesFirst ./tagFileTemplatesSecond | insert-datetime.sh | logger.sh ./logger.conf | tag-filter.sh ./tagTtyTemplatesFirst ./tagTtyTemplatesSecond
 "
 		exit 0
 	fi
@@ -31,10 +34,6 @@ do
 		templates=("$tmp" "${templates[@]}")
 	fi
 done
-
-#echo ${templates[0]}
-#echo "-------------------"
-#echo ${templates[1]}
 
 function filter {
 	iWord=0
@@ -70,7 +69,3 @@ do
 		echo "$line"
 	fi
 done
-
-#"
-#my-beautiful-server | tag-filter.sh ./tagFileTemplatesFirst ./tagFileTemplatesSecond | insert-datetime.sh | logger.sh ./logger.conf | tag-filter.sh ./tagTtyTemplatesFirst ./tagTtyTemplatesSecond
-#"
