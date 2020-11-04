@@ -27,13 +27,34 @@ Generate config first. Then change that config (if needed) and use it.
 	else
 		if [ $state == 1 ]
 		then
-			echo "# Если при работающем логгере меняете директорию логирования, обеспечьте чистоту новой директории, перед тем как на неё переключать
+			echo "# If you change the logging directory while the logger is running, ensure that the new directory is clean before switching to it.
 
+
+
+# This parameters you can change at runtime
+#===========================================
+
+# If duplicate to screen
 print_to_tty=true
-log_dir=1
-log_file_name_base=test
-log_file_limit=200 # in bytes
-log_files_limit=20" > "$i"
+
+# Directory to store log-files
+log_dir=log
+
+# Single log-file size limit (in bytes). If there is log-file greater then (THIS NUMBER OF BYTES) then next logging message would write to next log-file.
+log_file_limit=1000000 # 1 MB
+
+
+
+# Following parameters MUST NOT be changed at runtime
+#=====================================================
+
+# name template for log-files
+# XYZ would get names like XYZ.log.1, XYZ.log.2 & etc.
+# empty name template would get names like log.1, log.2 & etc.
+log_file_name_base=
+
+# Limit for log-files amount. If that limit reached then new log-files would replace the oldest log-file.
+log_files_limit=2000 # for 2 GB of logs at all" > "$i"
 			exit 0
 		elif [ $state == 2 ]
 		then
@@ -74,32 +95,40 @@ declare -i log_files_limit=0
 declare -i log_index=1
 
 refresh_config
+if [ ! -z $log_file_name_base ]
+then
+	log_file_name_base=$log_file_name_base.
+fi
 if [ -d "$log_dir" ]
 then
 	if [ -f "$log_dir"/last_log_index.txt ]
 	then
 		log_index=$(cat "$log_dir"/last_log_index.txt)
 	fi
-	if [ -f "$log_dir"/"$log_file_name_base".log.$log_index ]
+	if [ -f "$log_dir"/"$log_file_name_base"log.$log_index ]
 	then
-		get_size "$log_dir"/"$log_file_name_base".log.$log_index
+		get_size "$log_dir"/"$log_file_name_base"log.$log_index
 		if [ $sz -gt $log_file_limit ] # this is the oldest log to rewrite (ring logs)
 		then
-			echo -n "" > "$log_dir"/"$log_file_name_base".log.$log_index
+			echo -n "" > "$log_dir"/"$log_file_name_base"log.$log_index
 		fi
 	fi
 fi
 
-while read line
+while IFS= read line
 do
 	refresh_config
+	if [ ! -z $log_file_name_base ]
+	then
+		log_file_name_base=$log_file_name_base.
+	fi
 	if $print_to_tty
 	then
 		echo "$line"
 	fi
 	if [ ! -z "$log_dir" ]
 	then
-		log_file_name="$log_file_name_base".log.$log_index
+		log_file_name="$log_file_name_base"log.$log_index
 		mkdir -p "$log_dir"
 
 		echo "$line" >> "$log_dir"/"$log_file_name"
@@ -107,12 +136,12 @@ do
 		if [ $sz -gt $log_file_limit ]
 		then
 			log_index+=1
-			log_file_name="$log_file_name_base".log.$log_index
+			log_file_name="$log_file_name_base"log.$log_index
 		fi
 		if [ $log_index -gt $log_files_limit ]
 		then
 			log_index=1
-			log_file_name="$log_file_name_base".log.$log_index
+			log_file_name="$log_file_name_base"log.$log_index
 		fi
 		echo "$log_index" > "$log_dir"/last_log_index.txt
 		echo "$log_file_name" > "$log_dir"/last_log_filename.txt
