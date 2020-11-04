@@ -13,39 +13,54 @@ $(basename $0) [--help] [PATH_TO_FILE_WITH_PASSING_TAGS_TEMPLATES]
 OPTIONS:
 
 --help - show this help
+
+PATH_TO_FILE_WITH_PASSING_TAGS_TEMPLATES - one or more filepath-s (with list of filter templates each). First would apply for first word of each line, second - for second & etc.
 "
 		exit 0
 	fi
 done
 
+declare -a templates
+declare -i iWord
+
 for i in $*
 do
-	if [ -z "$tagFilter" ]
+	if [[ ! "$i" =~ ^-.* ]]
 	then
-		tagFilter="$i"
-	else
-		echo "unexpected argument. See help."
-		exit 1
+		tmp=$(sed $i -e "s/*/.*/g")
+		templates=("$tmp" "${templates[@]}")
 	fi
 done
 
-if [ -z "$tagFilter" ]
-then
-	echo "file with templates of passing tags not set"
-	exit 1
-fi
-
-templates=$(sed "$tagFilter" -e "s/*/.*/g")
+#echo ${templates[0]}
+#echo "-------------------"
+#echo ${templates[1]}
 
 function filter {
-	for i in $templates
+	iWord=0
+	for i in $1
 	do
-		if [[ "$1" =~ ^$i$ ]]
+		if [ $(($iWord+1)) -gt ${#templates[@]} ]
 		then
 			return 0
 		fi
+		ok=false
+		for iTempl in ${templates[$iWord]}
+		do
+			if [[ "$i" =~ ^${iTempl}$ ]]
+			then
+				ok=true
+				break
+			fi
+		done
+		if ! $ok
+		then
+			return 1
+		fi
+		iWord+=1
 	done
-	return 1
+
+	return 0
 }
 
 while read line
@@ -56,7 +71,6 @@ do
 	fi
 done
 
-
-"
-my-beautiful-server | tag-filter.sh ./tagFileTemplatesFirst ./tagFileTemplatesSecond | insert-datetime.sh | logger.sh ./logger.conf | tag-filter.sh ./tagTtyTemplatesFirst ./tagTtyTemplatesSecond
-"
+#"
+#my-beautiful-server | tag-filter.sh ./tagFileTemplatesFirst ./tagFileTemplatesSecond | insert-datetime.sh | logger.sh ./logger.conf | tag-filter.sh ./tagTtyTemplatesFirst ./tagTtyTemplatesSecond
+#"
