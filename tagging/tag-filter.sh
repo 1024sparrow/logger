@@ -23,6 +23,7 @@ my-beautiful-server | tag-filter.sh ./tagFileTemplatesFirst ./tagFileTemplatesSe
 	fi
 done
 
+declare -a templateFiles
 declare -a templates
 declare -i iWord
 
@@ -30,12 +31,18 @@ for i in $*
 do
 	if [[ ! "$i" =~ ^-.* ]]
 	then
-		tmp=$(sed $i -e "s/*/.*/g")
-		templates=("$tmp" "${templates[@]}")
+		templateFiles=("$i" ${templateFiles[@]})
 	fi
 done
 
 function filter {
+	templates=()
+	for i in ${templateFiles[@]}
+	do
+		tmp=$(sed "$i" -e "s/*/.*/g")
+		templates=("$tmp" "${templates[@]}")
+	done
+
 	iWord=0
 	for i in $1
 	do
