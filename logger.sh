@@ -82,8 +82,24 @@ function refresh_config {
 	source $refresh_config__mapped
 }
 
+declare -i get_size__cache=0
+get_size__filename=
+LANG=C LC_ALL=C
 function get_size {
-	sz=$(ls -l "$1" | awk '{print $5}')
+	if [ -z "$2" ]
+	then
+		get_size__filename="$1"
+		get_size__cache=$(ls -l "$1" | awk '{print $5}')
+	else
+		if [[ "$1" == "$get_size__filename" ]]
+		then
+			get_size__cache+=${#2}
+		else
+			get_size__filename="$1"
+			get_size__cache=${#2}
+		fi
+	fi
+	sz=$get_size__cache
 }
 
 curdir=$(dirname "$log_config_path")
@@ -111,6 +127,7 @@ then
 		if [ $sz -gt $log_file_limit ] # this is the oldest log to rewrite (ring logs)
 		then
 			echo -n "" > "$log_dir"/"$log_file_name_base"log.$log_index
+			get_size__cache=0
 		fi
 	fi
 fi
@@ -129,10 +146,14 @@ do
 	if [ ! -z "$log_dir" ]
 	then
 		log_file_name="$log_file_name_base"log.$log_index
-		mkdir -p "$log_dir"
+		if [ ! -d "$log_dir" ]
+		then
+			mkdir -p "$log_dir"
+		fi
 
 		echo "$line" >> "$log_dir"/"$log_file_name"
-		get_size "$log_dir"/"$log_file_name"
+		get_size "$log_dir"/"$log_file_name" "
+$line"
 		if [ $sz -gt $log_file_limit ]
 		then
 			log_index+=1
@@ -142,6 +163,8 @@ do
 		then
 			log_index=1
 			log_file_name="$log_file_name_base"log.$log_index
+			echo -n "" > "$log_file_name"
+			get_size__cache=0
 		fi
 		echo "$log_index" > "$log_dir"/last_log_index.txt
 		echo "$log_file_name" > "$log_dir"/last_log_filename.txt

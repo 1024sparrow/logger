@@ -48,6 +48,9 @@ testCommands=(
 	"./generate_bytes.sh 110 | ../logger.sh --config test.config" # 44
 	"./generate_bytes.sh 110 | ../logger.sh --config test.config" # 45
 	"./generate_bytes.sh 110 | ../logger.sh --config test.config" # 46
+	"./generate_bytes.sh 110 | ../logger.sh --config test.config" # 47
+	"./generate_bytes.sh 110 | ../logger.sh --config test.config" # 48
+	"./generate_bytes.sh 110 | ../logger.sh --config test.config" # 49
 )
 sizesExpected=(
 	"20" # 0
@@ -97,6 +100,9 @@ sizesExpected=(
 	"210 202 206 300 300 310 220 220 220 220 220 220 220 220 220 220 220 220 220 220" # 44
 	"110 202 206 300 300 310 220 220 220 220 220 220 220 220 220 220 220 220 220 220" # 45
 	"220 202 206 300 300 310 220 220 220 220 220 220 220 220 220 220 220 220 220 220" # 46
+	"220 110 206 300 300 310 220 220 220 220 220 220 220 220 220 220 220 220 220 220" # 47 *
+	"220 220 206 300 300 310 220 220 220 220 220 220 220 220 220 220 220 220 220 220" # 48 *
+	"220 220 110 300 300 310 220 220 220 220 220 220 220 220 220 220 220 220 220 220" # 49 *
 #	  1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19  20
 )
 
