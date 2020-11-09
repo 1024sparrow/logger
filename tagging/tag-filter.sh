@@ -156,7 +156,7 @@ do
 	if filter "$line1"
 	then
 		echo "$line1"
-	else
-		echo "## $line1"
+	#else
+	#	echo "## $line1"
 	fi
 done
