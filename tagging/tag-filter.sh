@@ -62,11 +62,14 @@ function filter {
 				tt_0=()
 				while read -r line
 				do
-					if [[ "$line" == "*" ]]
+					if [[ ! "$line" =~ ^#.* ]]
 					then
-						line=".*"
+						if [[ "$line" == "*" ]]
+						then
+							line=".*"
+						fi
+						tt_0=("${tt_0[@]}" "$line")
 					fi
-					tt_0=("${tt_0[@]}" "$line")
 				done < "$i"
 				#echo "template: ${tt_0[@]}"
 			elif [ $iWord -eq 1 ]
@@ -74,6 +77,15 @@ function filter {
 				tt_1=()
 				while read -r line
 				do
+echo '
+boris here
++1. Поддержка комментирования ('#' в начале строки)
+-2. Скобки(обычные, круглые) и точки экранируем
+Всё, что не звёздочка, заключаем в скобки
+Звёздочку заменяем на '.*'
+^, $
+
+' > /dev/null
 					if [[ "$line" == "*" ]]
 					then
 						line=".*"
