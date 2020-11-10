@@ -166,6 +166,11 @@ function filter {
 		iWord+=1
 	done
 
+	if [ $iWord -lt ${#templateFiles[@]} ]
+	then
+		return 1
+	fi
+
 	return 0
 }
 
