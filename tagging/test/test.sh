@@ -7,10 +7,14 @@ function testPair {
 	# 3 - boolean. If must be passed
 	# 4 - name of test (to print note about failure)
 
-	#echo "Running test \"$4\""
+#	echo "
+#Running test \"$4\"
+#" >> ~/1
 
 	realValue=true
+	#echo "$1" | ../tag-filter.sh $2
 	afterFilterText=$(echo "$1" | ../tag-filter.sh $2)
+	#echo "../tag-filter.sh $2"
 	if [ -z "$afterFilterText" ]
 	then
 		realValue=false
@@ -43,31 +47,31 @@ src=(
 # test name, test message, filter arguments, if pass throw
 	'1'     'qwe'       'test_config/1_allpass.conf'          true
 	'2'     'asd'       'test_config/1_allpass.conf'          true
-	'3'     'wer'       'test_config/2_pass_nothing.conf'     false
+	'3'     'wer'       'test_config/2_pass_nothing.conf'     false    #
 
 	'4'     'qwe'       'test_config/3_qwe_strong.conf'     true
 	'4.1'     'qwer'       'test_config/3_qwe_strong.conf'     false
 	'4.2'     'qw'       'test_config/3_qwe_strong.conf'     false
 	'4.3'     'qwer qwe'       'test_config/3_qwe_strong.conf'     false
 	'4.4'     'qwer qwe 4'       'test_config/3_qwe_strong.conf'     false
-	'4.5'     'qwe qwe 4'       'test_config/3_qwe_strong.conf'     false
-	'4.5'     'qwe qqwe 4'       'test_config/3_qwe_strong.conf'     true
-	'4.6'     ' qwe qqwe 4'       'test_config/3_qwe_strong.conf'     true
-	'4.7'     '	qwe qqwe 4'       'test_config/3_qwe_strong.conf'     true
-	'4.8'     '   qwe qqwe 4'       'test_config/3_qwe_strong.conf'     true
+	'4.5'     'qwe qwe 4'       'test_config/3_qwe_strong.conf'     true
+	'4.6'     'qwe qqwe 4'       'test_config/3_qwe_strong.conf'     true
+	'4.7'     ' qwe qqwe 4'       'test_config/3_qwe_strong.conf'     true
+	'4.8'     '	qwe qqwe 4'       'test_config/3_qwe_strong.conf'     true
+	'4.9'     '   qwe qqwe 4'       'test_config/3_qwe_strong.conf'     true
 
 	'5'     'qwer2 4'       'test_config/4_qwe_starting.conf'     true
 	'5.1'     '   qwer2 4 56  sdf sdfhh(dd) <%5 $o'       'test_config/4_qwe_starting.conf'     true
 	'5.2'     'Sqwer TT'       'test_config/4_qwe_starting.conf'     false
-	'5.3'     'qweR TT'       'test_config/4_qwe_starting.conf'     false
+	'5.3'     'qweR TT'       'test_config/4_qwe_starting.conf'     true
 
-	'6'     'wear_qwe (aa) d'       'test_config/5_qwe_end.conf'     true
+	'6'     'wear_qwe (aa) d'       'test_config/5_qwe_end.conf'     true   #
 	'6.1'     ' sd qwe f'       'test_config/5_qwe_end.conf'     false
-	'6.2'     'qwe'       'test_config/5_qwe_end.conf'     true
+	'6.2'     'qwe'       'test_config/5_qwe_end.conf'     true     #
 	'6.3'     'qowe'       'test_config/5_qwe_end.conf'     false
 
 	'7'     'asqwe.qwe'       'test_config/6_qwe_mid.conf'     true
-	'7.1'     'wer'       'test_config/6_qwe_mid.conf'     true
+	'7.1'     'wer'       'test_config/6_qwe_mid.conf'     false
 
 	'8'     'karlson'       'test_config/7_karl_SOME_son.conf'     true
 	'8.1'     '  karlson sdf sdf'       'test_config/7_karl_SOME_son.conf'     true
@@ -82,16 +86,17 @@ src=(
 	'9.2'     'karlson'       'test_config/8_boris_olga_karlooo.conf'     true
 	'9.3'     'boriska'       'test_config/8_boris_olga_karlooo.conf'     false
 	'9.4'     'olgan'       'test_config/8_boris_olga_karlooo.conf'     false
-	'9.5'     'kar'       'test_config/8_boris_olga_karlooo.conf'     false
+	'9.5'     'kar'       'test_config/8_boris_olga_karlooo.conf'     false  #
 
 	# multi-field filtering (some config-s)
-	'10'     'wer'       'test_config/1_allpass.conf test_config/2_pass_nothing.conf'     false
-	'10.1'     'wer 456'       'test_config/1_allpass.conf test_config/2_pass_nothing.conf'     false
-	'10.2'     'wer 56+ 89+'       'test_config/1_allpass.conf test_config/2_pass_nothing.conf'     false
+	'10'     'wer'       'test_config/1_allpass.conf test_config/2_pass_nothing.conf'     false     #
+	'10.1'     'wer 456'       'test_config/1_allpass.conf test_config/2_pass_nothing.conf'     false    #
+	'10.2'     'wer 56+ 89+'       'test_config/1_allpass.conf test_config/2_pass_nothing.conf'     false    #
+	'10.3'     'wer 56+ 89+'       'test_config/1_allpass.conf test_config/1_allpass.conf'     true
 
 	'11'     'wer 56+ 89+'       'test_config/8_boris_olga_karlooo.conf test_config/9_dima_vika.conf'     false
 	'11.1'     'boris 56+ 89+'       'test_config/8_boris_olga_karlooo.conf test_config/9_dima_vika.conf'     false
-	'11.2'     'boris olga 89+'       'test_config/8_boris_olga_karlooo.conf test_config/9_dima_vika.conf'     true
+	'11.2'     'boris olga 89+'       'test_config/8_boris_olga_karlooo.conf test_config/9_dima_vika.conf'     false
 	'11.3'     'boris dima 89+'       'test_config/8_boris_olga_karlooo.conf test_config/9_dima_vika.conf'     true
 	'11.4'     ' boris vika wer 56+ 89+'       'test_config/8_boris_olga_karlooo.conf test_config/9_dima_vika.conf'     true
 	'11.5'     ' boris vikar wer 56+ 89+'       'test_config/8_boris_olga_karlooo.conf test_config/9_dima_vika.conf'     false

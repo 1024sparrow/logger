@@ -46,10 +46,15 @@ then
 	exit 1
 fi
 
+function debug {
+	echo $* >> ~/1
+}
+
 function filter {
 	iWord=0
 	for i in ${templateFiles[@]}
 	do
+		#echo "i: \"$i\""
 		if [ $iWord -lt $tt_count ]
 		then
 			if [ $iWord -eq 0 ]
@@ -63,6 +68,7 @@ function filter {
 					fi
 					tt_0=("${tt_0[@]}" "$line")
 				done < "$i"
+				#echo "template: ${tt_0[@]}"
 			elif [ $iWord -eq 1 ]
 			then
 				tt_1=()
@@ -90,9 +96,9 @@ function filter {
 		fi
 	done
 
-	#echo "#0### ${tt_0[@]}"
-	#echo "#1### ${tt_1[@]}"
-	#echo "#2### ${tt_2[@]}"
+	#debug "	#0### ${#tt_0[@]}: \"${tt_0[@]}\""
+	#debug "	#1### ${#tt_1[@]}: \"${tt_1[@]}\""
+	#debug "	#2### ${#tt_2[@]}: \"${tt_2[@]}\""
 
 	iWord=0
 	for i in $1
@@ -107,34 +113,46 @@ function filter {
 			iTempl=0
 			while [[ ${iTempl} -lt ${#tt_0[@]} ]]
 			do
-				if [[ "$i" =~ ${tt_0[$iTempl]} ]]
+				if [ ! -z "${tt_0[$iTempl]}" ]
 				then
-					ok=true
-					break
+					#if [[ "$i" =~ ^${tt_0[$iTempl]}$ ]]
+					if [[ "$i" =~ ${tt_0[$iTempl]} ]]
+					then
+						ok=true
+						break
+					fi
 				fi
 				iTempl+=1
 			done
 		elif [[ $iWord -eq 1 ]]
 		then
 			iTempl=0
+			#debug 123 1
 			while [[ ${iTempl} -lt ${#tt_1[@]} ]]
 			do
-				if [[ "$i" =~ ${tt_1[$iTempl]} ]]
+				if [ ! -z "${tt_1[$iTempl]}" ]
 				then
-					ok=true
-					break
+					if [[ "$i" =~ ${tt_1[$iTempl]} ]]
+					then
+						ok=true
+						break
+					fi
 				fi
 				iTempl+=1
 			done
 		elif [[ $iWord -eq 2 ]]
 		then
 			iTempl=0
+			#debug 123 2
 			while [[ ${iTempl} -lt ${#tt_2[@]} ]]
 			do
-				if [[ "$i" =~ ${tt_2[$iTempl]} ]]
+				if [ ! -z "${tt_2[$iTempl]}" ]
 				then
-					ok=true
-					break
+					if [[ "$i" =~ ${tt_2[$iTempl]} ]]
+					then
+						ok=true
+						break
+					fi
 				fi
 				iTempl+=1
 			done
