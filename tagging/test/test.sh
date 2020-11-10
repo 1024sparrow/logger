@@ -25,7 +25,7 @@ function testPair {
 
 	if [ ! $realValue == $3 ]
 	then
-		echo "Test \"$4\" failed: \"$3\" expected. \"$realValue\" taken." # boris here
+		echo "Test \"$4\" failed."
 		return 1
 	fi
 	return 0
@@ -148,7 +148,7 @@ src=(
 	'15.2'     'bors'       'test_config/13_boOOs.conf'     false
 	'15.3'     'bo.is'       'test_config/13_boOOs.conf'     false
 	'15.4'     'bo..c'       'test_config/13_boOOs.conf'     false
-	'15.5'     'bo..s'       'test_config/13_boOOs.conf'     true
+	'15.5'     'bo..s'       'test_config/13_boOOs.conf'     false
 	'15.6'     'bo..sa'       'test_config/13_boOOs.conf'     false
 )
 failed=false

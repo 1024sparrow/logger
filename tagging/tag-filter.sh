@@ -62,13 +62,34 @@ function filter {
 				tt_0=()
 				while read -r line
 				do
-					if [[ ! "$line" =~ ^#.* ]]
+					if [[ ! "$line" =~ ^[[:space:]]*$ ]]
 					then
-						if [[ "$line" == "*" ]]
+						if [[ ! "$line" =~ ^#.* ]]
 						then
-							line=".*"
+							if [[ "$line" == "*" ]]
+							then
+								line="^.*\$"
+							else
+								if [[ "${line:0:1}" == "*" ]]
+								then
+									line="&1${line:1}"
+								else
+									line="(${line}"
+								fi
+								if [[ "${line: -1}" == "*" ]]
+								then
+									line="${line:0:-1}&2"
+								else
+									line="${line})"
+								fi
+								line="${line//\./\\.}"
+								line="${line//\*/).*(}"
+								line="${line/&1/.*(}"
+								line="${line/&2/).*}"
+								line="^${line}\$"
+							fi
+							tt_0=("${tt_0[@]}" "$line")
 						fi
-						tt_0=("${tt_0[@]}" "$line")
 					fi
 				done < "$i"
 				#echo "template: ${tt_0[@]}"
@@ -77,31 +98,70 @@ function filter {
 				tt_1=()
 				while read -r line
 				do
-echo '
-boris here
-+1. Поддержка комментирования ('#' в начале строки)
--2. Скобки(обычные, круглые) и точки экранируем
-Всё, что не звёздочка, заключаем в скобки
-Звёздочку заменяем на '.*'
-^, $
-
-' > /dev/null
-					if [[ "$line" == "*" ]]
+					if [[ ! "$line" =~ ^[[:space:]]*$ ]]
 					then
-						line=".*"
+						if [[ ! "$line" =~ ^#.* ]]
+						then
+							if [[ "$line" == "*" ]]
+							then
+								line="^.*\$"
+							else
+								if [[ "${line:0:1}" == "*" ]]
+								then
+									line="&1${line:1}"
+								else
+									line="(${line}"
+								fi
+								if [[ "${line: -1}" == "*" ]]
+								then
+									line="${line:0:-1}&2"
+								else
+									line="${line})"
+								fi
+								line="${line//\./\\.}"
+								line="${line//\*/).*(}"
+								line="${line/&1/.*(}"
+								line="${line/&2/).*}"
+								line="^${line}\$"
+							fi
+							tt_1=("${tt_1[@]}" "$line")
+						fi
 					fi
-					tt_1=("${tt_1[@]}" "$line")
 				done < "$i"
 			elif [ $iWord -eq 2 ]
 			then
 				tt_2=()
 				while read -r line
 				do
-					if [[ "$line" == "*" ]]
+					if [[ ! "$line" =~ ^[[:space:]]*$ ]]
 					then
-						line=".*"
+						if [[ ! "$line" =~ ^#.* ]]
+						then
+							if [[ "$line" == "*" ]]
+							then
+								line="^.*\$"
+							else
+								if [[ "${line:0:1}" == "*" ]]
+								then
+									line="&1${line:1}"
+								else
+									line="(${line}"
+								fi
+								if [[ "${line: -1}" == "*" ]]
+								then
+									line="${line:0:-1}&2"
+								else
+									line="${line})"
+								fi
+								line="${line//\./\\.}"
+								line="${line//\*/).*(}"
+								line="${line/&1/.*(}"
+								line="${line/&2/).*}"
+								line="^${line}\$"
+							fi
+							tt_2=("${tt_2[@]}" "$line")
+						fi
 					fi
-					tt_2=("${tt_2[@]}" "$line")
 				done < "$i"
 			fi
 			iWord+=1
@@ -139,7 +199,6 @@ boris here
 		elif [[ $iWord -eq 1 ]]
 		then
 			iTempl=0
-			#debug 123 1
 			while [[ ${iTempl} -lt ${#tt_1[@]} ]]
 			do
 				if [ ! -z "${tt_1[$iTempl]}" ]
@@ -155,7 +214,6 @@ boris here
 		elif [[ $iWord -eq 2 ]]
 		then
 			iTempl=0
-			#debug 123 2
 			while [[ ${iTempl} -lt ${#tt_2[@]} ]]
 			do
 				if [ ! -z "${tt_2[$iTempl]}" ]
