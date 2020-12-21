@@ -86,6 +86,7 @@ declare -i get_size__cache=0
 get_size__filename=
 LANG=C LC_ALL=C
 function get_size {
+	sz=$get_size__cache
 	if [ -z "$2" ]
 	then
 		get_size__filename="$1"
@@ -99,7 +100,6 @@ function get_size {
 			get_size__cache=${#2}
 		fi
 	fi
-	sz=$get_size__cache
 }
 
 curdir=$(dirname "$log_config_path")
@@ -117,9 +117,9 @@ then
 fi
 if [ -d "$log_dir" ]
 then
-	if [ -f "$log_dir"/last_log_index.txt ]
+	if [ -f "$log_dir"/last-log-index.txt ]
 	then
-		log_index=$(cat "$log_dir"/last_log_index.txt)
+		log_index=$(cat "$log_dir"/last-log-index.txt)
 	fi
 	if [ -f "$log_dir"/"$log_file_name_base"log.$log_index ]
 	then
@@ -132,7 +132,8 @@ then
 	fi
 fi
 
-while IFS= read line
+overriding=false
+while IFS= read -r line
 do
 	refresh_config
 	if [ ! -z $log_file_name_base ]
@@ -150,24 +151,33 @@ do
 		then
 			mkdir -p "$log_dir"
 		fi
-
-		echo "$line" >> "$log_dir"/"$log_file_name"
+		
+		overriding=false
 		get_size "$log_dir"/"$log_file_name" "
 $line"
 		if [ $sz -gt $log_file_limit ]
 		then
 			log_index+=1
-			log_file_name="$log_file_name_base"log.$log_index
+			overriding=true
 		fi
 		if [ $log_index -gt $log_files_limit ]
 		then
 			log_index=1
-			log_file_name="$log_file_name_base"log.$log_index
-			echo -n "" > "$log_file_name"
-			get_size__cache=0
+			overriding=true
 		fi
-		echo "$log_index" > "$log_dir"/last_log_index.txt
-		echo "$log_file_name" > "$log_dir"/last_log_filename.txt
+
+		if $overriding
+		then
+			log_file_name="$log_file_name_base"log.$log_index
+			get_size__cache=0
+			echo "$line" > "$log_dir"/"$log_file_name"
+			get_size "$log_dir"/"$log_file_name" "
+$line"
+		else
+			echo "$line" >> "$log_dir"/"$log_file_name"
+		fi
+		echo "$log_index" > "$log_dir"/last-log-index.txt
+		echo "$log_file_name" > "$log_dir"/last-log-filename.txt
 	fi
 #
 done

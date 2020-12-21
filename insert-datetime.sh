@@ -44,7 +44,7 @@ function generate_time_string {
 	timestring=$(date +$argFormat)
 }
 
-while IFS= read line
+while IFS= read -r line
 do
 	generate_time_string
 	echo "$timestring" "$line"

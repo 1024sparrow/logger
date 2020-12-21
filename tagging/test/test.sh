@@ -166,15 +166,17 @@ do
 		testConf="$i"
 	else
 		ifShouldPass="$i"
-		testPair "$inputMessage" "$testConf" "$ifShouldPass" "$testName" || failed=true
+		testPair "$inputMessage" "$testConf" "$ifShouldPass" "$testName" && echo -n "." || failed=true
 	fi
 	index+=1
 done
 
 if ! $failed
 then
+	echo
 	echo "All tests passed"
 else
 	echo "
 Errors occured. Test not passed."
+	exit 1
 fi

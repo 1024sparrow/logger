@@ -40,7 +40,7 @@ declare -a tt_1
 declare -a tt_2
 declare -i tt_count=3
 
-if [[ ${#templateFiles[@]} -ge $tt_count ]]
+if [[ ${#templateFiles[@]} -gt $tt_count ]]
 then
 	echo "$(basename $0) supports no greater 3 filtering fields"
 	exit 1
@@ -62,6 +62,10 @@ function filter {
 				tt_0=()
 				while read -r line
 				do
+					if [[ "$line" =~ $'\r' ]]
+					then
+						line="${line:0: -1}"
+					fi
 					if [[ ! "$line" =~ ^[[:space:]]*$ ]]
 					then
 						if [[ ! "$line" =~ ^#.* ]]
@@ -98,6 +102,10 @@ function filter {
 				tt_1=()
 				while read -r line
 				do
+					if [[ "$line" =~ $'\r' ]]
+					then
+						line="${line:0: -1}"
+					fi
 					if [[ ! "$line" =~ ^[[:space:]]*$ ]]
 					then
 						if [[ ! "$line" =~ ^#.* ]]
@@ -133,6 +141,10 @@ function filter {
 				tt_2=()
 				while read -r line
 				do
+					if [[ "$line" =~ $'\r' ]]
+					then
+						line="${line:0: -1}"
+					fi
 					if [[ ! "$line" =~ ^[[:space:]]*$ ]]
 					then
 						if [[ ! "$line" =~ ^#.* ]]
@@ -244,7 +256,7 @@ function filter {
 	return 0
 }
 
-while read line1
+while IFS= read -r line1
 do
 	if filter "$line1"
 	then
