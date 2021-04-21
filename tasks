@@ -1,0 +1,7 @@
+April 21, 2021
+==============
+1.) Option "datetime in log-file names". In this mode log-files create new and remove old instead of replacing old file content.
+    Task status: TODO
+2.) Option "zip logs". In this mode log file size mean it's size before compression.
+    So logging in this mode is caching. If Timeout elapsed then flush current logs. In futher this file must be rezipped with addon logs.
+    Task status: TODO

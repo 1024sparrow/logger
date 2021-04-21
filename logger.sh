@@ -44,9 +44,15 @@ log_dir=log
 log_file_limit=1000000 # 1 MB
 
 
-
 # Following parameters MUST NOT be changed at runtime
 #=====================================================
+
+# Compress files before saving. Single log-file size is the size before compession.
+use_compression=false # NEW!
+
+# Use datetime as log-file suffix. I.e. use \"log.2021-04-21--20-52-09\" instead of \"log.1\". Old file in this mode will be deleted (and new file created with another name) instead of replaced with new files.
+use_datetime_filename_suffix=true # NEW!
+
 
 # name template for log-files
 # XYZ would get names like XYZ.log.1, XYZ.log.2 & etc.
@@ -62,6 +68,15 @@ log_files_limit=2000 # for 2 GB of logs at all" > "$i"
 		fi
 	fi
 done
+
+function getDatetime() { # boris here
+	while IFS=: read -r a b
+	do
+		[[ $a =~ rtc_time ]] && t="${b// /}"
+		[[ $a =~ rtc_date ]] && d="${b// /}"
+	done < /proc/driver/rtc
+	echo $d--$t
+}
 
 if [ ! -f "$log_config_path" ]
 then
