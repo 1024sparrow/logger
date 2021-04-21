@@ -69,13 +69,13 @@ log_files_limit=2000 # for 2 GB of logs at all" > "$i"
 	fi
 done
 
-function getDatetime() { # boris here
+function getDatetime { # boris here
 	while IFS=: read -r a b
 	do
 		[[ $a =~ rtc_time ]] && t="${b// /}"
 		[[ $a =~ rtc_date ]] && d="${b// /}"
 	done < /proc/driver/rtc
-	echo $d--$t
+	$1="$d--${t//:/-}"
 }
 
 if [ ! -f "$log_config_path" ]
@@ -123,18 +123,30 @@ pushd "$curdir" > /dev/null
 declare -i sz=0
 declare -i log_file_limit=0
 declare -i log_files_limit=0
-declare -i log_index=1
 
 refresh_config
+if $use_datetime_filename_suffix
+then
+	declare -i log_index=1
+else
+	declare log_index
+	getDatetime log_index
+fi
 if [ ! -z $log_file_name_base ]
 then
 	log_file_name_base=$log_file_name_base.
 fi
 if [ -d "$log_dir" ]
 then
-	if [ -f "$log_dir"/last-log-index.txt ]
+	if $use_datetime_filename_suffix
 	then
-		log_index=$(cat "$log_dir"/last-log-index.txt)
+		tmp=($(ls "$log_dir")) # list of filenames order descending of it's name
+		log_index=${tmp[-1]}
+	else
+		if [ -f "$log_dir"/last-log-index.txt ]
+		then
+			log_index=$(cat "$log_dir"/last-log-index.txt)
+		fi
 	fi
 	if [ -f "$log_dir"/"$log_file_name_base"log.$log_index ]
 	then
@@ -172,12 +184,25 @@ do
 $line"
 		if [ $sz -gt $log_file_limit ]
 		then
-			log_index+=1
+			if $use_datetime_filename_suffix
+			then
+				getDatetime log_index
+			else
+				log_index+=1
+			fi
 			overriding=true
 		fi
 		if [ $log_index -gt $log_files_limit ]
 		then
-			log_index=1
+			if $use_datetime_filename_suffix
+			then
+				# boris here: remove the oldest log-file
+				tmp=($(ls "$log_dir")) # list of filenames order descending of it's name
+				rm ${tmp[0]}
+				getDatetime log_index
+			else
+				log_index=1
+			fi
 			overriding=true
 		fi
 
@@ -191,8 +216,11 @@ $line"
 		else
 			echo "$line" >> "$log_dir"/"$log_file_name"
 		fi
-		echo "$log_index" > "$log_dir"/last-log-index.txt
-		echo "$log_file_name" > "$log_dir"/last-log-filename.txt
+		if ! $use_datetime_filename_suffix
+		then
+			echo "$log_index" > "$log_dir"/last-log-index.txt
+			echo "$log_file_name" > "$log_dir"/last-log-filename.txt
+		fi
 	fi
 #
 done
