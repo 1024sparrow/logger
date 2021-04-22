@@ -6,6 +6,13 @@ pushd "$curDir" > /dev/null
 echo "
 Testing logger
 =============="
+if which gzip > /dev/null
+then
+	echo 'gzip found succesfully'
+else
+	gzip not found on the system
+fi
+
 echo "
 Testing logger: testing file writing:
 -------------------------------------"

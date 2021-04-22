@@ -20,10 +20,11 @@ done
 
 for i in $*
 do
-	[[ $i == "--version" ]] && {
+	if [[ $i == "--version" ]]
+	then
 		echo '1.1'
 		exit 0
-	}
+	fi
 done
 
 for i in $*
@@ -62,7 +63,7 @@ log_file_limit=1000000 # 1 MB
 #=====================================================
 
 # Compress files before saving. Single log-file size is the size before compession.
-use_compression=false # NEW! No implemented yet!
+use_compression=false # Works only with "use_datetime_filename_suffix=true".
 
 # Use datetime as log-file suffix. I.e. use \"log.2021-04-21--20-52-09\" instead of \"log.1\". Old file in this mode will be deleted (and new file created with another name) instead of replaced with new files.
 use_datetime_filename_suffix=true
@@ -201,6 +202,10 @@ $line"
 		then
 			if $use_datetime_filename_suffix
 			then
+				if $use_compression
+				then
+					gzip "$log_dir"/"$log_file_name_base"log.$log_index
+				fi
 				getDatetime log_index
 			else
 				log_index+=1
