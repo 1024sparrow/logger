@@ -6,4 +6,4 @@ April 22, 2021
 ==============
 version 1.1:
 TASK: Option "datetime in log-file names". In this mode log-files create new and remove old instead of replacing old file content.
-    Task status: Applied, not tested.
+    Task status: Applied, tested manually, there is not auto-tests.
