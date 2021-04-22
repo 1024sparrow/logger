@@ -62,10 +62,10 @@ log_file_limit=1000000 # 1 MB
 #=====================================================
 
 # Compress files before saving. Single log-file size is the size before compession.
-use_compression=false # NEW!
+use_compression=false # NEW! No implemented yet!
 
 # Use datetime as log-file suffix. I.e. use \"log.2021-04-21--20-52-09\" instead of \"log.1\". Old file in this mode will be deleted (and new file created with another name) instead of replaced with new files.
-use_datetime_filename_suffix=true # NEW!
+use_datetime_filename_suffix=true
 
 
 # name template for log-files
@@ -83,7 +83,7 @@ log_files_limit=2000 # for 2 GB of logs at all" > "$i"
 	fi
 done
 
-function getDatetime { # boris here
+function getDatetime {
 	while IFS=: read -r a b
 	do
 		[[ $a =~ rtc_time ]] && t="${b// /}"
@@ -143,7 +143,6 @@ if $use_datetime_filename_suffix
 then
 	declare log_index
 	getDatetime log_index
-	echo "boris debug. Initial log_index: $log_index"
 else
 	declare -i log_index=1
 fi
@@ -158,7 +157,6 @@ then
 	then
 		tmp=($(ls "$log_dir")) # list of filenames order descending of it's name
 		log_index=${tmp[-1]:${#tmpTemplate}}
-		echo "boris debug. log_index from existen file: $log_index"
 	else
 		if [ -f "$log_dir"/last-log-index.txt ]
 		then
@@ -209,15 +207,8 @@ $line"
 			fi
 			overriding=true
 		fi
-		if $use_datetime_filename_suffix
+		if ! $use_datetime_filename_suffix
 		then
-			tmp=($(ls "$log_dir"/"$tmpTemplate"*)) # list of filenames order descending of it's name
-			if [ $((${#tmp[@]} + 1)) -gt $log_files_limit ]
-			then
-				rm ${tmp[0]}
-			fi
-#
-		else
 			if [ $log_index -gt $log_files_limit ]
 			then
 				log_index=1
@@ -239,6 +230,14 @@ $line"
 		then
 			echo "$log_index" > "$log_dir"/last-log-index.txt
 			echo "$log_file_name" > "$log_dir"/last-log-filename.txt
+		fi
+		if $use_datetime_filename_suffix
+		then
+			tmp=($(ls "$log_dir"/"$tmpTemplate"* 2>/dev/null)) # list of filenames order descending of it's name
+			if [ ${#tmp[@]} -gt $log_files_limit ]
+			then
+				rm ${tmp[0]}
+			fi
 		fi
 	fi
 #
