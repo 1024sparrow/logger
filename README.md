@@ -30,6 +30,9 @@ Valid arguments:
 Generate config first. Then change that config (if needed) and use it.
 ```
 
+## История изменений
+Смотрите [здесь](changelog)
+
 
 ## Тестирование
 ./test-all.sh
@@ -41,6 +44,6 @@ Generate config first. Then change that config (if needed) and use it.
 
 ## Лицензия
 
-Copyright © 2020 [Васильев Борис](https://github.com/1024sparrow)
+Copyright © 2020-2021 [Васильев Борис](https://github.com/1024sparrow)
 
 Публикуется под лицензией [MIT license](https://github.com/1024sparrow/logger/blob/master/LICENSE).
