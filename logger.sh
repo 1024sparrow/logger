@@ -1,6 +1,7 @@
 #!/bin/bash
 
 declare -i state=0
+
 for i in $*
 do
 	if [[ $i == "--help" || $i == "-h" ]]
@@ -14,7 +15,20 @@ Valid arguments:
 Generate config first. Then change that config (if needed) and use it.
 "
 		exit 0
-	elif [[ $i == "--generate-config" ]]
+	fi
+done
+
+for i in $*
+do
+	[[ $i == "--version" ]] && {
+		echo '1.1'
+		exit 0
+	}
+done
+
+for i in $*
+do
+	if [[ $i == "--generate-config" ]]
 	then
 		state=1
 	elif [[ $i == "--config" ]]
@@ -75,7 +89,7 @@ function getDatetime { # boris here
 		[[ $a =~ rtc_time ]] && t="${b// /}"
 		[[ $a =~ rtc_date ]] && d="${b// /}"
 	done < /proc/driver/rtc
-	$1="$d--${t//:/-}"
+	log_index="$d--${t//:/-}"
 }
 
 if [ ! -f "$log_config_path" ]
@@ -127,21 +141,24 @@ declare -i log_files_limit=0
 refresh_config
 if $use_datetime_filename_suffix
 then
-	declare -i log_index=1
-else
 	declare log_index
 	getDatetime log_index
+	echo "boris debug. Initial log_index: $log_index"
+else
+	declare -i log_index=1
 fi
 if [ ! -z $log_file_name_base ]
 then
 	log_file_name_base=$log_file_name_base.
 fi
+tmpTemplate="$log_file_name_base"log.
 if [ -d "$log_dir" ]
 then
 	if $use_datetime_filename_suffix
 	then
 		tmp=($(ls "$log_dir")) # list of filenames order descending of it's name
-		log_index=${tmp[-1]}
+		log_index=${tmp[-1]:${#tmpTemplate}}
+		echo "boris debug. log_index from existen file: $log_index"
 	else
 		if [ -f "$log_dir"/last-log-index.txt ]
 		then
@@ -192,18 +209,20 @@ $line"
 			fi
 			overriding=true
 		fi
-		if [ $log_index -gt $log_files_limit ]
+		if $use_datetime_filename_suffix
 		then
-			if $use_datetime_filename_suffix
+			tmp=($(ls "$log_dir"/"$tmpTemplate"*)) # list of filenames order descending of it's name
+			if [ $((${#tmp[@]} + 1)) -gt $log_files_limit ]
 			then
-				# boris here: remove the oldest log-file
-				tmp=($(ls "$log_dir")) # list of filenames order descending of it's name
 				rm ${tmp[0]}
-				getDatetime log_index
-			else
-				log_index=1
 			fi
-			overriding=true
+#
+		else
+			if [ $log_index -gt $log_files_limit ]
+			then
+				log_index=1
+				overriding=true
+			fi
 		fi
 
 		if $overriding

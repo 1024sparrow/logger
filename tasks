@@ -1,5 +1,6 @@
 April 21, 2021
 ==============
+version 1.1:
 1.) Option "datetime in log-file names". In this mode log-files create new and remove old instead of replacing old file content.
     Task status: Applied, not tested.
 2.) Option "zip logs". In this mode log file size mean it's size before compression.
