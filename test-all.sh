@@ -10,7 +10,7 @@ if which gzip > /dev/null
 then
 	echo 'gzip found succesfully'
 else
-	gzip not found on the system
+	echo 'gzip not found on the system'
 fi
 
 echo "
