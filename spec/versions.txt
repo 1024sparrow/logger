@@ -1,0 +1,10 @@
+Version of the `Logger` has major and minor versions.
+
+Major version is version of specification.
+Minor version is version of implementation of its specification: realization of not realized earlier featutes, fixing bugs.
+Upgrading for newer minor version must not break existen projects which already use Logger.
+Within new minor version may be specification changes in means with no user's project restructuring required.
+
+New major version may make you restructure your project.
+
+Each major version of the Logger located in separated git branch (e.g. "v2" or "v1").
