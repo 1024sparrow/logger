@@ -1,6 +1,7 @@
 #include "logger.h"
 
-Logger::Logger()
+Logger::Logger(Settings &&settings)
+    :_settings{settings}
 {
     //
 }

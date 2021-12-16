@@ -12,7 +12,7 @@ public:
         struct Tag
         {
             bool showOnScreen {true};
-            const char *tag;
+            const char *tag {nullptr};
             const char *directory {nullptr};
             const char *baseFileName {nullptr};
             uint32_t fileSizeLimit;
@@ -20,22 +20,24 @@ public:
             enum class CompressType
             {
                 None
-            } compressType;
+            } compressType {CompressType::None};
             bool binary;
             std::list<Tag *> subtags;
         };
 
         bool printToTty {false};
-        const char *pipePath;
+        const char *pipePath {nullptr};
         enum class PipeType
         {
+            None,
             Pipe, // как-то так...
             Socket
-        } pipeType;
+        } pipeType {PipeType::None};
         Tag tags;
     };
 
-    Logger();
+    Logger(Settings &&settings);
 
 private:
+    Settings _settings;
 };

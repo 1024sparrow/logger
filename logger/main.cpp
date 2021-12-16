@@ -116,7 +116,24 @@ Source code available on https://github.com/1024sparrow/logger
     }
     if (configPath)
     {
-        Logger logger;
+//        Logger logger( // boris e: надо сделать инициализацию по содержимому конфигурационного файла
+//            Logger::Settings{
+//                true,
+//                nullptr,
+//                Logger::Settings::PipeType::None,
+//                Logger::Settings::Tag {
+//                    true,
+//                    nullptr,
+//                    "/home/boris/logs",
+//                    "test-log",
+//                    50,
+//                    1024,
+//                    Logger::Settings::Tag::CompressType::None,
+//                    false
+//                }
+//            }
+//        );
+        Logger logger(Logger::Settings());
     }
 
 	return 0;
