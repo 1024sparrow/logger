@@ -97,23 +97,22 @@ Source code available on https://github.com/1024sparrow/logger
     {
         int fdFile = open(
             generateConfigPath,
-            O_CREAT | O_TRUNC,
-            O_WRONLY
+            O_CREAT | O_TRUNC | O_WRONLY,
+            0644
         );
         if (fdFile < 0)
         {
-            puts("can not open file to write configuration example");
+            perror("can not open file to write configuration example");
             return 1;
         }
         const char *strConfigTemplate =
 #include "config-template.txt"
         ;
-        puts(strConfigTemplate);//
-        write(fdFile, strConfigTemplate, strlen(strConfigTemplate));
+        if (write(fdFile, strConfigTemplate, strlen(strConfigTemplate)) < 0)
+        {
+            perror("can not write configuration example");
+        }
         close(fdFile);
-//        puts(
-//#include "config-template.txt"
-//        );
     }
     if (configPath)
     {
