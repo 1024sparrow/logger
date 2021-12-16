@@ -1,6 +1,12 @@
-#include <string.h>
 #include <stdio.h>
-#include <thread>
+
+#include <sys/types.h> // open
+#include <sys/stat.h> // open
+#include <fcntl.h> // open
+#include <unistd.h> // write, close
+#include <string.h> // strlen
+
+#include "logger.h"
 
 #define CHECK_UNEXPECTED_KEY(T) if (T[0] == '-'){printf("Unexpected argument: %s\n", T);return 1;}
 
@@ -86,8 +92,33 @@ Source code available on https://github.com/1024sparrow/logger
         puts("There is not arguments. Nothing to do.");
         return 1;
     }
-    puts("==============");
 
+    if (generateConfigPath)
+    {
+        int fdFile = open(
+            generateConfigPath,
+            O_CREAT | O_TRUNC,
+            O_WRONLY
+        );
+        if (fdFile < 0)
+        {
+            puts("can not open file to write configuration example");
+            return 1;
+        }
+        const char *strConfigTemplate =
+#include "config-template.txt"
+        ;
+        puts(strConfigTemplate);//
+        write(fdFile, strConfigTemplate, strlen(strConfigTemplate));
+        close(fdFile);
+//        puts(
+//#include "config-template.txt"
+//        );
+    }
+    if (configPath)
+    {
+        Logger logger;
+    }
 
 	return 0;
 }
