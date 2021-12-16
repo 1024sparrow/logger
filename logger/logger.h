@@ -3,7 +3,7 @@
 #include <list>
 #include <thread>
 
-class Logger
+class Logger final
 {
 public:
 
@@ -25,6 +25,7 @@ public:
             std::list<Tag *> subtags;
         };
 
+        size_t bufferSize {4096};
         bool printToTty {false};
         const char *pipePath {nullptr};
         enum class PipeType
@@ -36,8 +37,14 @@ public:
         Tag tags;
     };
 
-    Logger(Settings &&settings);
+    Logger(const Settings &settings);
+    ~Logger();
+
+    void start();
+    void routine();
 
 private:
     Settings _settings;
+    std::thread _t;
+    void *_buffer;
 };

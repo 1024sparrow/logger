@@ -9,7 +9,7 @@ set(SOURCES
 )
 #file(GLOB SOURCES *.cpp)
 add_executable(logger ${SOURCES} ${RCC_SOURCES})
-#target_link_libraries(logger
-	#$<$<PLATFORM_ID:Linux>:pthread>
-#)
+target_link_libraries(logger
+        $<$<PLATFORM_ID:Linux>:pthread>
+)
 
