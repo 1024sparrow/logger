@@ -134,8 +134,8 @@ Source code available on https://github.com/1024sparrow/logger
 //            }
 //        );
         Logger::Settings settings;
-        Logger logger(settings);
-        logger.start();
+        Logger logger;
+        logger.start(settings);
     }
 
 	return 0;

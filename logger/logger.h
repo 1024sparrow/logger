@@ -2,6 +2,7 @@
 
 #include <list>
 #include <thread>
+#include <atomic>
 
 class Logger final
 {
@@ -37,14 +38,20 @@ public:
         Tag tags;
     };
 
-    Logger(const Settings &settings);
+    Logger();
     ~Logger();
 
-    void start();
-    void routine();
+    void start(const Settings &settings);
+    void routineRead();
+    void routineConf();
+    void routineWrite();
 
 private:
     Settings _settings;
-    std::thread _t;
-    void *_buffer;
+    std::thread _tRead;
+    std::thread _tConf;
+    std::thread _tWrite;
+    //std::atomic_bool _messageQueued;
+    void *_bufferRead = nullptr;
+    void *_bufferConfig = nullptr;
 };
