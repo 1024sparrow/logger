@@ -1,57 +1,41 @@
+#include "config.h"
+#include "ringbuffer.h"
+
 #include <stdint.h>
 
 #include <list>
 #include <thread>
 #include <atomic>
+#include <mutex>
+#include <condition_variable>
 
 class Logger final
 {
 public:
-
-    struct Settings // Эту структуру мы должны заполнить по содержимому конфигурационного файла
-    {
-        struct Tag
-        {
-            bool showOnScreen {true};
-            const char *tag {nullptr};
-            const char *directory {nullptr};
-            const char *baseFileName {nullptr};
-            uint32_t fileSizeLimit;
-            uint64_t directorySizeLimit;
-            enum class CompressType
-            {
-                None
-            } compressType {CompressType::None};
-            bool binary;
-            std::list<Tag *> subtags;
-        };
-
-        size_t bufferSize {4096};
-        bool printToTty {false};
-        const char *pipePath {nullptr};
-        enum class PipeType
-        {
-            None,
-            Pipe, // как-то так...
-            Socket
-        } pipeType {PipeType::None};
-        Tag tags;
-    };
-
     Logger();
     ~Logger();
 
-    void start(const Settings &settings);
+    void start(const Config &settings);
+
+private:
     void routineRead();
     void routineConf();
     void routineWrite();
+    void writeFile(ssize_t size, void * data);
 
 private:
-    Settings _settings;
-    std::thread _tRead;
+    enum State
+    {
+        Normal,
+        Receiving
+    } _state {State::Normal};
+
+    Config _settings;
+    std::mutex _mutex;
+    std::condition_variable _cvMessageReceived;
     std::thread _tConf;
     std::thread _tWrite;
-    //std::atomic_bool _messageQueued;
     void *_bufferRead = nullptr;
     void *_bufferConfig = nullptr;
+    RingBuffer _bufferWrite;
 };

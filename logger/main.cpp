@@ -133,9 +133,26 @@ Source code available on https://github.com/1024sparrow/logger
 //                }
 //            }
 //        );
-        Logger::Settings settings;
+//        Logger::Settings settings{
+//            4096,
+//            true,
+//            "/home/boris/boris.fifo",
+//            {
+//                true,
+//                nullptr,
+//                "/home/boris/boristest",
+//                "test-log",
+//                50,
+//                1024,
+//                false,
+//                0,
+//                nullptr
+//            }
+//        };
+        Config config;
+        parseConfigInit(&config);
         Logger logger;
-        logger.start(settings);
+        logger.start(config);
     }
 
 	return 0;

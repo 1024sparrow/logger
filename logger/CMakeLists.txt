@@ -6,6 +6,10 @@ set(SOURCES
 	WIN32 main.cpp
     logger.h
     logger.cpp
+	config.h
+	config.cpp
+    ringbuffer.h
+    ringbuffer.cpp
 )
 #file(GLOB SOURCES *.cpp)
 add_executable(logger ${SOURCES} ${RCC_SOURCES})
