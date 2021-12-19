@@ -40,5 +40,4 @@ private:
     void *_bufferRead = nullptr;
     void *_bufferConfig = nullptr;
     RingBuffer _bufferWrite;
-    char _parseTagBuffer[PARSE_TAG_BUFFER_SIZE]; // фуфер на чтение тэга
 };
