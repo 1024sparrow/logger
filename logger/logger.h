@@ -22,6 +22,8 @@ private:
     void routineConf();
     void routineWrite();
     void writeFile(ssize_t size, void * data);
+    Config::Tag * detectTag(Config::Tag *parentTag, const char *buffer, int bufferSize);
+    void writeLogMessageToFile(Config::Tag *tag, void *message, int messageSize);
 
 private:
     enum State
@@ -38,4 +40,5 @@ private:
     void *_bufferRead = nullptr;
     void *_bufferConfig = nullptr;
     RingBuffer _bufferWrite;
+    char _parseTagBuffer[PARSE_TAG_BUFFER_SIZE]; // фуфер на чтение тэга
 };

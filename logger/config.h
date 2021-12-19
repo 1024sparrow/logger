@@ -42,7 +42,7 @@ struct Config // Эту структуру мы должны заполнить 
 //                None
 //            } compressType {CompressType::None};
         bool binary {false};
-        size_t subratsCount {0};
+        size_t subtagsCount {0};
         Tag * subtags {nullptr};
     };
 

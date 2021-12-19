@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 
 #include <sys/types.h> // open
 #include <sys/stat.h> // open
@@ -12,8 +13,9 @@ const int
     CONFIG_BUFFER_SIZE = 0x400, // 1 KB
 
     WRITE_BUFFER_PAGE = 0x1000, // вот такими вот кусочками заполняется буфер (это же ограничение на размер одного текстового сообщения). Т.е. если даже пришло сообщение лога размером 1 байт, всё равно в памяти это займёт 4096 байтов. Это же ограничение на размер сообщения.
-    WRITE_BUFFER_SIZE = 0x4000 // число кусочков. 16384.
+    WRITE_BUFFER_SIZE = 0x4000, // число кусочков. 16384.
     // Всего выделяется памяти 64МБ (67108864 байт)
+    PARSE_TAG_BUFFER_SIZE = 256
 ;
 
 Logger::Logger()
@@ -37,15 +39,10 @@ Logger::~Logger()
 
 void Logger::start(const Config &settings)
 {
-//    writeBufferPageLimit = WRITE_BUFFER_SIZE;
-//    freeBufferCount = writeBufferPageLimit;
-    //_bufferWrite = alloc();
-
     _bufferRead = malloc(settings.bufferSize);
     _bufferConfig = malloc(CONFIG_BUFFER_SIZE);
     _settings = settings;
 
-//    _tRead = std::thread(&Logger::routineRead, this);
     _tConf = std::thread(&Logger::routineConf, this);
     _tWrite = std::thread(&Logger::routineWrite, this);
 
@@ -60,8 +57,6 @@ void Logger::routineRead()
     while(true)
     {
         readCount = read(0, _bufferRead, _settings.bufferSize);
-        write(1, _bufferRead, readCount); // пишем в консоль (на экран) // boris e: на случай слишком плотного потока логов. У нас есть защита от задержки на запись в файл. Но у нас нет защиты от задержки от вывода на экран.
-
         if (readCount > 0)
         {
             if (readCount == WRITE_BUFFER_PAGE)
@@ -127,10 +122,101 @@ void Logger::routineWrite()
 
 void Logger::writeFile(ssize_t size, void * data)
 {
-    puts("-- data written --");
+    puts("-- Logger::writeFile --");
+    if (size == 0)
+        return;
 
-//    for (char *ch = (char *)_bufferRead, *chLast = (char *)_bufferRead + readCount - 1  ; ch <= chLast ; ++ch)
-//    {
-//        if ()
-//    }
+    int parsedTagSize = 0;
+    enum class State
+    {
+        TagStarting,
+        Tag,
+        Body
+    };
+    State state {_settings.tags.subtagsCount ? State::TagStarting : State::Body};
+    Config::Tag *tag = &_settings.tags;
+
+    for (char *ch = (char *)_bufferRead, *chLast = (char *)_bufferRead + size ; ch < chLast ; ++ch)
+    {
+        if (state == State::TagStarting)
+        {
+            if (*ch == ' ' || *ch == '\t')
+                continue;
+            _parseTagBuffer[0] = *ch;
+            parsedTagSize = 1;
+            state = State::Tag;
+        }
+        else if (state == State::Tag)
+        {
+            if (*ch == ' ' || *ch == '\t')
+            {
+                assert(parsedTagSize > 0);
+                tag = detectTag(tag, _parseTagBuffer, parsedTagSize);
+                state = tag->subtagsCount ? State::TagStarting : State::Body;
+            }
+            else
+            {
+                if (parsedTagSize >= PARSE_TAG_BUFFER_SIZE)
+                {
+                    puts(".. too large tag used ..");
+                    return;
+                }
+                _parseTagBuffer[parsedTagSize] = *ch;
+                ++parsedTagSize;
+            }
+        }
+        else if (state == State::Body)
+        {
+            break; // всё, что нам нужно было знать, мы уже знаем
+        }
+    }
+    if (tag->showOnScreen)
+    {
+        write(1, data, size);
+    }
+    if (tag->subtagsCount == 0)
+    {
+        writeLogMessageToFile(tag, data, size);
+    }
 }
+
+Config::Tag * Logger::detectTag(Config::Tag *parentTag, const char *buffer, int bufferSize)
+{
+    //
+}
+
+void Logger::writeLogMessageToFile(Config::Tag *tag, void *message, int messageSize)
+{
+    //
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
