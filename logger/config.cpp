@@ -5,6 +5,7 @@
 int parseConfigInit(Config *config)
 {
     config = (Config *) malloc(sizeof(Config));
+    return 1;
 }
 
 int parseConfigProcess(Config *config, size_t dataLen, void *data)

@@ -46,7 +46,6 @@ struct Config // Эту структуру мы должны заполнить 
         Tag * subtags {nullptr};
     };
 
-    size_t bufferSize {4096};
     bool printToTty {false};
     const char *pipePath {nullptr};
 //        enum class PipeType

@@ -150,7 +150,46 @@ Source code available on https://github.com/1024sparrow/logger
 //            }
 //        };
         Config config;
-        parseConfigInit(&config);
+        /*
+         * bool showOnScreen {true};
+        const char *tag {nullptr};
+        const char *directory {nullptr};
+        const char *baseFileName {nullptr};
+        uint32_t fileSizeLimit;
+        uint64_t directorySizeLimit;
+//            enum class CompressType
+//            {
+//                None
+//            } compressType {CompressType::None};
+        bool binary {false};
+        size_t subtagsCount {0};
+        Tag * subtags {nullptr};
+         */
+        Config::Tag subtags[] {
+            {
+                true,
+                "boris1",
+                "/home/boris/boristest",
+                "test-log-1",
+                10,
+                30,
+                false
+            },
+            {
+                true,
+                "boris2",
+                "/home/boris/boristest",
+                "test-log-2",
+                10,
+                30,
+                false
+            }
+        };
+        config.tags.subtags = subtags;
+        config.tags.subtagsCount = 2;
+
+
+        //parseConfigInit(&config);
         Logger logger;
         logger.start(config);
     }

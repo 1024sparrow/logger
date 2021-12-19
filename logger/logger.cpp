@@ -7,6 +7,7 @@
 #include <sys/types.h> // open
 #include <sys/stat.h> // open
 #include <fcntl.h> // open
+#include <chrono>
 
 // 0x40 - 64, 0x400 - 1024, 0x400000 - миллион
 const int
@@ -16,10 +17,12 @@ const int
     WRITE_BUFFER_SIZE = 0x4000, // число кусочков. 16384.
     // Всего выделяется памяти 64МБ (67108864 байт)
 
-    PARSE_TAG_BUFFER_SIZE = 256
+    PARSE_TAG_BUFFER_SIZE = 256,
+    STDIN_READ_BUFFER = WRITE_BUFFER_PAGE
 ;
+//size_t bufferSize {4096},
 
-char _parseTagBuffer[256]; // фуфер на чтение тэга
+static char _parseTagBuffer[PARSE_TAG_BUFFER_SIZE];
 
 Logger::Logger()
     : _bufferWrite(WRITE_BUFFER_SIZE, WRITE_BUFFER_PAGE)
@@ -42,14 +45,14 @@ Logger::~Logger()
 
 void Logger::start(const Config &settings)
 {
-    _bufferRead = malloc(settings.bufferSize);
+    _bufferRead = malloc(STDIN_READ_BUFFER);
     _bufferConfig = malloc(CONFIG_BUFFER_SIZE);
     _settings = settings;
 
-    _tConf = std::thread(&Logger::routineConf, this);
+//    _tConf = std::thread(&Logger::routineConf, this);
     _tWrite = std::thread(&Logger::routineWrite, this);
 
-    _tConf.detach();
+//    _tConf.detach();
     _tWrite.detach();
     routineRead();
 }
@@ -59,7 +62,8 @@ void Logger::routineRead()
     ssize_t readCount = 0;
     while(true)
     {
-        readCount = read(0, _bufferRead, _settings.bufferSize);
+        readCount = read(0, _bufferRead, STDIN_READ_BUFFER);
+        printf("YYYYY %ld\n", readCount);
         if (readCount > 0)
         {
             if (readCount == WRITE_BUFFER_PAGE)
@@ -84,7 +88,21 @@ void Logger::routineRead()
                 }
             }
         }
+        else if (readCount == 0)
+        {
+            puts("Logger normally closed");
+            std::unique_lock<std::mutex> lock(_mutex);
+            _cvClose = true;
+            _cvMessageReceived.notify_all();
+            //break;
+        }
+        else
+        {
+            perror("Logger read error");
+            break;
+        }
     }
+    puts("HANA");
 }
 
 void Logger::routineConf()
@@ -109,16 +127,22 @@ void Logger::routineConf()
 
 void Logger::routineWrite()
 {
+    RingBuffer::Chunk chunk;
     while(true)
     {
         std::unique_lock<std::mutex> lock(_mutex);
         _cvMessageReceived.wait(lock);
 
-        RingBuffer::Chunk chunk;
-        auto res = _bufferWrite.pop(chunk);
-        if (res == RingBuffer::PopResult::Success)
+        puts("00");
+        for (auto res = _bufferWrite.pop(chunk) ; res == RingBuffer::PopResult::Success ; res = _bufferWrite.pop(chunk))
         {
+            puts("11");
             writeFile(chunk.size, chunk.data);
+        }
+
+        if (_cvClose)
+        {
+            break;
         }
     }
 }
@@ -176,6 +200,10 @@ void Logger::writeFile(ssize_t size, void * data)
     if (tag->showOnScreen)
     {
         write(1, data, size);
+        if (tag->subtagsCount)
+        {
+            puts("incorrect log message (too little tags)");
+        }
     }
     if (tag->subtagsCount == 0)
     {
@@ -185,12 +213,21 @@ void Logger::writeFile(ssize_t size, void * data)
 
 Config::Tag * Logger::detectTag(Config::Tag *parentTag, const char *buffer, int bufferSize)
 {
-    //
+    write(1, "tag \"", 6);
+    write(1, buffer, bufferSize);
+    write(1, "\"\n", 3);
+
+    for (int iSubtag = 0 ; iSubtag < parentTag->subtagsCount ; ++iSubtag)
+    {
+        //
+    }
+
+    return parentTag;
 }
 
 void Logger::writeLogMessageToFile(Config::Tag *tag, void *message, int messageSize)
 {
-    //
+    puts("Logger::writeLogMessageToFile");
 }
 
 

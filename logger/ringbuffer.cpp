@@ -53,7 +53,7 @@ RingBuffer::PopResult RingBuffer::pop(Chunk &chunk)
 
     Chunk &bufferChunk = _buffer[_indexRead];
     chunk.size = bufferChunk.size;
-    memcpy(chunk.data, bufferChunk.data, bufferChunk.size);
+    //memcpy(chunk.data, bufferChunk.data, bufferChunk.size);
     _indexRead = (_indexRead + 1) % _pageSize;
     --_size;
     return PopResult::Success;
