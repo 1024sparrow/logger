@@ -51,19 +51,22 @@ void Logger::start(const Config &settings)
 
 //    _tConf = std::thread(&Logger::routineConf, this);
     _tWrite = std::thread(&Logger::routineWrite, this);
+    _tRead = std::thread(&Logger::routineRead, this);
 
 //    _tConf.detach();
-    _tWrite.detach();
-    routineRead();
+    _tWrite.join();
+    _tRead.join();
 }
 
 void Logger::routineRead()
 {
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     ssize_t readCount = 0;
     while(true)
     {
         readCount = read(0, _bufferRead, STDIN_READ_BUFFER);
-        printf("YYYYY %ld\n", readCount);
+        //printf("readCount: %ld", readCount);//
+        //write(1, _bufferRead, readCount);//
         if (readCount > 0)
         {
             if (readCount == WRITE_BUFFER_PAGE)
@@ -93,8 +96,9 @@ void Logger::routineRead()
             puts("Logger normally closed");
             std::unique_lock<std::mutex> lock(_mutex);
             _cvClose = true;
-            _cvMessageReceived.notify_all();
-            //break;
+            _cvMessageReceived.notify_one();
+            puts("_cvMessageReceived.notify_one()");
+            break;
         }
         else
         {
@@ -127,16 +131,19 @@ void Logger::routineConf()
 
 void Logger::routineWrite()
 {
+    puts("Logger::routineWrite");
     RingBuffer::Chunk chunk;
+    chunk.data = malloc(WRITE_BUFFER_PAGE);
     while(true)
     {
+        puts("11");
         std::unique_lock<std::mutex> lock(_mutex);
         _cvMessageReceived.wait(lock);
+        puts("22");
 
-        puts("00");
+        puts("-- flushing buffer --");
         for (auto res = _bufferWrite.pop(chunk) ; res == RingBuffer::PopResult::Success ; res = _bufferWrite.pop(chunk))
         {
-            puts("11");
             writeFile(chunk.size, chunk.data);
         }
 
@@ -145,6 +152,8 @@ void Logger::routineWrite()
             break;
         }
     }
+    puts("routineWrite finishing");
+    free(chunk.data);
 }
 
 void Logger::writeFile(ssize_t size, void * data)
@@ -152,6 +161,8 @@ void Logger::writeFile(ssize_t size, void * data)
     puts("-- Logger::writeFile --");
     if (size == 0)
         return;
+
+//    write(1, data, size);//
 
     int parsedTagSize = 0;
     enum class State
@@ -163,7 +174,8 @@ void Logger::writeFile(ssize_t size, void * data)
     State state {_settings.tags.subtagsCount ? State::TagStarting : State::Body};
     Config::Tag *tag = &_settings.tags;
 
-    for (char *ch = (char *)_bufferRead, *chLast = (char *)_bufferRead + size ; ch < chLast ; ++ch)
+    //for (char *ch = (char *)_bufferRead, *chLast = (char *)_bufferRead + size ; ch < chLast ; ++ch)
+    for (char *ch = (char *)data, *chLast = (char *)data + size ; ch < chLast ; ++ch)
     {
         if (state == State::TagStarting)
         {
@@ -213,9 +225,9 @@ void Logger::writeFile(ssize_t size, void * data)
 
 Config::Tag * Logger::detectTag(Config::Tag *parentTag, const char *buffer, int bufferSize)
 {
-    write(1, "tag \"", 6);
-    write(1, buffer, bufferSize);
-    write(1, "\"\n", 3);
+//    write(1, "tag \"", 6);
+//    write(1, buffer, bufferSize);
+//    write(1, "\"\n", 3);
 
     for (int iSubtag = 0 ; iSubtag < parentTag->subtagsCount ; ++iSubtag)
     {

@@ -7,7 +7,7 @@ RingBuffer::RingBuffer(int pageCount, int pageSize)
     : _pageCount(pageCount)
     , _pageSize(pageSize)
 {
-    _buffer = (Chunk *)malloc(pageCount * sizeof(Chunk));
+    _buffer = new Chunk[pageCount];//(Chunk *)malloc(pageCount * sizeof(Chunk));
     for (int i = 0 ; i < pageCount ; ++i)
     {
         _buffer[i].data = malloc(pageSize);
@@ -20,7 +20,8 @@ RingBuffer::~RingBuffer()
     {
         free(_buffer[i].data);
     }
-    free(_buffer);
+    //free(_buffer);
+    delete[] _buffer;
 }
 
 int RingBuffer::pageSize() const
@@ -53,7 +54,8 @@ RingBuffer::PopResult RingBuffer::pop(Chunk &chunk)
 
     Chunk &bufferChunk = _buffer[_indexRead];
     chunk.size = bufferChunk.size;
-    //memcpy(chunk.data, bufferChunk.data, bufferChunk.size);
+    memcpy(chunk.data, bufferChunk.data, bufferChunk.size);
+//    memcpy(chunk.data, "blablabla", 9);
     _indexRead = (_indexRead + 1) % _pageSize;
     --_size;
     return PopResult::Success;

@@ -36,6 +36,7 @@ private:
     std::mutex _mutex;
     std::condition_variable _cvMessageReceived;
     bool _cvClose {false};
+    std::thread _tRead;
     std::thread _tConf;
     std::thread _tWrite;
     void *_bufferRead = nullptr;
