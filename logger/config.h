@@ -45,7 +45,18 @@ struct Config // Эту структуру мы должны заполнить 
 		bool binary {false};
 		//        size_t subtagsCount {0};
 		//        Tag * subtags {nullptr};
-		std::list<Tag> subtags {};
+		std::list<Tag> subtags {
+			{
+				true,
+				"boris",
+				"boris",
+				"boris.log",
+				20,
+				50,
+				false,
+				{}
+			}
+		};
 
 	};
 
@@ -64,3 +75,37 @@ int parseConfigInit(Config *config);
 int parseConfigProcess(Config *config, size_t dataLen, void *data);
 int parseConfigFinish(Config *config);
 void parseConfigFree(Config *config);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
