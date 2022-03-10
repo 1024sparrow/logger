@@ -4,21 +4,21 @@
 
 int parseConfigInit(Config *config)
 {
-    config = (Config *) malloc(sizeof(Config));
-    return 1;
+	config = (Config *) malloc(sizeof(Config));
+	return 1;
 }
 
 int parseConfigProcess(Config *config, size_t dataLen, void *data)
 {
-    return 1;
+	return 1;
 }
 
 int parseConfigFinish(Config *config)
 {
-    return 1;
+	return 1;
 }
 
 void parseConfigFree(Config *config)
 {
-    free(config);
+	free(config);
 }
