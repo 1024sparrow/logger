@@ -171,7 +171,7 @@ void Logger::writeFile(ssize_t size, void * data)
 		Tag,
 		Body
 	};
-	State state {_settings.tags.subtagsCount ? State::TagStarting : State::Body};
+	State state {_settings.tags.subtags.size() ? State::TagStarting : State::Body};
 	Config::Tag *tag = &_settings.tags;
 
 	//for (char *ch = (char *)_bufferRead, *chLast = (char *)_bufferRead + size ; ch < chLast ; ++ch)
@@ -191,7 +191,7 @@ void Logger::writeFile(ssize_t size, void * data)
 			{
 				assert(parsedTagSize > 0);
 				tag = detectTag(tag, _parseTagBuffer, parsedTagSize);
-				state = tag->subtagsCount ? State::TagStarting : State::Body;
+				state = tag->subtags.size() ? State::TagStarting : State::Body;
 			}
 			else
 			{
@@ -212,12 +212,12 @@ void Logger::writeFile(ssize_t size, void * data)
 	if (tag->showOnScreen)
 	{
 		write(1, data, size);
-		if (tag->subtagsCount)
+		if (tag->subtags.size())
 		{
 			puts("incorrect log message (too little tags)");
 		}
 	}
-	if (tag->subtagsCount == 0)
+	if (tag->subtags.size() == 0)
 	{
 		writeLogMessageToFile(tag, data, size);
 	}
@@ -229,7 +229,8 @@ Config::Tag * Logger::detectTag(Config::Tag *parentTag, const char *buffer, int 
 	//	write(1, buffer, bufferSize);
 	//	write(1, "\"\n", 3);
 
-	for (int iSubtag = 0 ; iSubtag < parentTag->subtagsCount ; ++iSubtag)
+	//for (int iSubtag = 0 ; iSubtag < parentTag->subtagsCount ; ++iSubtag)
+	for (auto &oTag : parentTag->subtags)
 	{
 		//
 	}
